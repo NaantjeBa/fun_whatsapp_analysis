@@ -18,23 +18,26 @@ def get_raw_txtfiles():
     return file_list
 
 
-def read_in_txt(file_name):
-    "Read in txt file"
+def _change_to_waexport_dir():
     os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\whatsapp_exports")
+
+
+def _read_in_txt(file_name):
+    "Read in txt file"
     file = open(file_name, encoding='utf-8')
     read_lines = file.readlines()  # This makes it a list with an item per record
 
     return read_lines
 
 
-def filter_out(read_lines):
-    "Filter out rows with less than two ':' characters (eg: Koen heeft groep aangemaakt)"
+def _filter_out_singles(read_lines):
+    "Filter in rows with more than one ':' characters (eg: Koen heeft groep aangemaakt is being fileterd out)"
     filtered_list = [line for line in read_lines if line.count(':') > 1]
 
     return filtered_list
 
 
-def first_tab(filtered_list):
+def _make_first_tab(filtered_list):
     first_tab_list = []
     for line in filtered_list:
         first_tab_index = line.find(' - ')  # Find first tab index
@@ -47,7 +50,7 @@ def first_tab(filtered_list):
     return first_tab_list
 
 
-def second_tab(first_tab_list):
+def _make_second_tab(first_tab_list):
     second_tab_list = []
     for line in first_tab_list:
         second_tab_index = line.find(': ')  # Find second tab index
@@ -58,18 +61,18 @@ def second_tab(first_tab_list):
     return second_tab_list
 
 
-def filter_in_twotabs(second_tab_list):
+def _filter_in_twotabs(second_tab_list):
 
     filtered_tab_list = [line for line in second_tab_list if line.count('\t') == 2]
 
     return filtered_tab_list
 
 
-def change_to_tabdel_dir():
+def _change_to_tabdel_dir():
     os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\tab_dels")
 
 
-def write_tabdel_txtfile(file_nr, filtered_tab_list):
+def _write_tabdel_txtfile(file_nr, filtered_tab_list):
 
     file_name = 'tab_del_file_'
     file_nr_str = str(file_nr)
@@ -82,16 +85,14 @@ def write_tabdel_txtfile(file_nr, filtered_tab_list):
 
 def loop_create_tabdels(file_list):
     for file_nr, file in enumerate(file_list):
-        read_lines = read_in_txt(file)
-        filtered_list = filter_out(read_lines)
-        first_tab_list = first_tab(filtered_list)
-        second_tab_list = second_tab(first_tab_list)
-        filtered_tab_list = filter_in_twotabs(second_tab_list)
-        change_to_tabdel_dir()
-        write_tabdel_txtfile(file_nr, filtered_tab_list)
-
-"Make file tab delimited like Adams"
-"Save to other directory"
+        _change_to_waexport_dir()
+        read_lines = _read_in_txt(file)
+        filtered_list = _filter_out_singles(read_lines)
+        first_tab_list = _make_first_tab(filtered_list)
+        second_tab_list = _make_second_tab(first_tab_list)
+        filtered_tab_list = _filter_in_twotabs(second_tab_list)
+        _change_to_tabdel_dir()
+        _write_tabdel_txtfile(file_nr, filtered_tab_list)
 
 
 "Create empty master_df with columns Datetime, User and Message"
@@ -150,10 +151,7 @@ def loop_create_tabdels(file_list):
 # logging.debug(f'Records deleted: {len(second_tab_list) - len(filtered_tab_list)}')
 # logging.debug(filtered_tab_list[:3])
 # logging.debug('------------------------')
-#
-#
-#
-#
-#
+
+
 file_list = get_raw_txtfiles()
 loop_create_tabdels(file_list)
