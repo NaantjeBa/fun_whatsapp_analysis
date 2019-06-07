@@ -1,7 +1,14 @@
 import os
 from os import listdir
 from os.path import isfile, join
+import logging
 
+LOG_FORMAT = '%(asctime)s:%(message)s'
+logging.basicConfig(filename='C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\log\\debug.log',
+                    level=logging.DEBUG,
+                    format=LOG_FORMAT,
+                    filemode='w'
+                    )
 
 def get_raw_txtfiles():
     "Get list with every txt file"
@@ -10,12 +17,11 @@ def get_raw_txtfiles():
 
     return file_list
 
-"For every export txt file in directory"
 
-def read_in_txt():
+def read_in_txt(file_name):
     "Read in txt file"
     os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\whatsapp_exports")
-    file = open("raw_jesse.txt", encoding='utf-8')
+    file = open(file_name, encoding='utf-8')
     read_lines = file.readlines()  # This makes it a list with an item per record
 
     return read_lines
@@ -26,6 +32,7 @@ def filter_out(read_lines):
     filtered_list = [line for line in read_lines if line.count(':') > 1]
 
     return filtered_list
+
 
 def first_tab(filtered_list):
     first_tab_list = []
@@ -39,6 +46,7 @@ def first_tab(filtered_list):
     # count_first_tab = len(first_tab_list)
     return first_tab_list
 
+
 def second_tab(first_tab_list):
     second_tab_list = []
     for line in first_tab_list:
@@ -48,6 +56,40 @@ def second_tab(first_tab_list):
 
     # count_second_tab = len(second_tab_list)
     return second_tab_list
+
+
+def filter_in_twotabs(second_tab_list):
+
+    filtered_tab_list = [line for line in second_tab_list if line.count('\t') == 2]
+
+    return filtered_tab_list
+
+
+def change_to_tabdel_dir():
+    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\tab_dels")
+
+
+def write_tabdel_txtfile(file_nr, filtered_tab_list):
+
+    file_name = 'tab_del_file_'
+    file_nr_str = str(file_nr)
+    file_type = '.txt'
+    full_file_name = file_name + file_nr_str + file_type
+    with open(full_file_name, 'w', encoding='utf-8') as f:
+        for item in filtered_tab_list:
+            f.write(item)
+
+
+def loop_create_tabdels(file_list):
+    for file_nr, file in enumerate(file_list):
+        read_lines = read_in_txt(file)
+        filtered_list = filter_out(read_lines)
+        first_tab_list = first_tab(filtered_list)
+        second_tab_list = second_tab(first_tab_list)
+        filtered_tab_list = filter_in_twotabs(second_tab_list)
+        change_to_tabdel_dir()
+        write_tabdel_txtfile(file_nr, filtered_tab_list)
+
 "Make file tab delimited like Adams"
 "Save to other directory"
 
@@ -69,4 +111,49 @@ def second_tab(first_tab_list):
 "Save file to csv"
 "Create pickle"
 
-read_in_txt()
+
+
+
+# logging.debug(read_in_txt.__name__)
+# logging.debug(type(read_lines))
+# logging.debug(len(read_lines))
+# logging.debug(read_lines[:3])
+# logging.debug('------------------------')
+#
+#
+# logging.debug(filter_out.__name__)
+# logging.debug(type(filtered_list))
+# logging.debug(len(filtered_list))
+# logging.debug(f'Records deleted: {len(read_lines) - len(filtered_list)}')
+# logging.debug(filtered_list[:3])
+# logging.debug('------------------------')
+#
+#
+#
+# logging.debug(first_tab.__name__)
+# logging.debug(type(first_tab_list))
+# logging.debug(len(first_tab_list))
+# logging.debug(first_tab_list[:3])
+# logging.debug('------------------------')
+#
+#
+# logging.debug(second_tab.__name__)
+# logging.debug(type(second_tab_list))
+# logging.debug(len(second_tab_list))
+# logging.debug(second_tab_list[:3])
+# logging.debug('------------------------')
+#
+#
+# logging.debug(filter_out.__name__)
+# logging.debug(type(filtered_tab_list))
+# logging.debug(len(filtered_tab_list))
+# logging.debug(f'Records deleted: {len(second_tab_list) - len(filtered_tab_list)}')
+# logging.debug(filtered_tab_list[:3])
+# logging.debug('------------------------')
+#
+#
+#
+#
+#
+file_list = get_raw_txtfiles()
+loop_create_tabdels(file_list)
