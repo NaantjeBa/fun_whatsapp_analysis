@@ -85,13 +85,13 @@ def _check_first_col_for_date(sec_sep_list):
     return date_filtered_list
 
 
-def _change_to_tabdel_dir():
-    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\android")
+def _change_to_temp_dir():
+    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_temp_csv_fact\\android")
 
 
 def _write_csv_file(file_nr, filtered_tab_list):
 
-    file_name = 'tab_del_file_'
+    file_name = 'temp_facttable_'
     file_nr_str = str(file_nr)
     file_type = '.csv'
     full_file_name = file_name + file_nr_str + file_type
@@ -109,7 +109,7 @@ def loop_create_csvs(file_list):
         second_tab_list = _make_second_sep(first_tab_list)
         filtered_tab_list = _filter_in_twoseps(second_tab_list)
         date_filtered_list = _check_first_col_for_date(filtered_tab_list)
-        _change_to_tabdel_dir()
+        _change_to_temp_dir()
         _write_csv_file(file_nr, date_filtered_list)
 
 

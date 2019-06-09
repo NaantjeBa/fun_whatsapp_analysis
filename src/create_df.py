@@ -11,10 +11,10 @@ logging.basicConfig(level=logging.DEBUG,
                     )
 
 
-def create_empty_df():
-    master_df = pd.DataFrame(columns=['datetime', 'user', 'message'])
-
-    return master_df
+# def create_empty_df():
+#     master_df = pd.DataFrame(columns=['datetime', 'user', 'message'])
+#
+#     return master_df
 
 
 def change_to_masterdf_dir():
@@ -30,14 +30,14 @@ def get_master_df():
     logging.debug(len(log_topic))
     logging.debug(log_topic.columns)
     logging.debug(log_topic.user.unique())
-    logging.debug(log_topic.head())
+    #logging.debug(log_topic.head())
 
     return df_master
 
 
-def get_android_tab_dels():
+def get_android_temp_csvs():
     "Get list with every txt file"
-    mypath = "C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\android"
+    mypath = "C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_temp_csv_fact\\android"
     file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
     log_topic = file_list
@@ -46,35 +46,17 @@ def get_android_tab_dels():
     return file_list
 
 
-def get_iphonetab_dels():
-    "Get list with every txt file"
-    mypath = "C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\iphone"
-    file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-
-    return file_list
-
-
-def get_iphone_tab_dels():
-    "Get list with every txt file"
-    mypath = "C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\iphone"
-    file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-
-    return file_list
-
-
 def change_to_android_dir():
-    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\android")
+    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_temp_csv_fact\\android")
 
 
-def change_to_iphone_dir():
-    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\iphone")
-
-
-def _read_in_tabdel(filename):
+def _read_in_temp_fact(filename):
     "read in txt file to df"
-    df = pd.read_csv(filename, sep=r'\t', engine='python', header=None,
-                     names=['datetime', 'user', 'message'],
-                     parse_dates=['datetime'], encoding='utf-8')
+    df = pd.read_csv(filename, sep=r';', names=['datetime', 'user', 'message'])
+
+    log_topic = df
+    logging.debug(len(log_topic))
+    # logging.debug(log_topic.head(3))
 
     return df
 
@@ -84,41 +66,84 @@ def _append_to_masterdf(master_df, df):
 
     master_df = master_df.append(df)
 
+    log_topic = master_df
+    logging.debug(len(log_topic))
+    # logging.debug(log_topic.head(3))
     return master_df
 
 
 def loop_append_to_masterdf(master_df, file_list):
     for file in file_list:
-        df = _read_in_tabdel(file)
+        df = _read_in_temp_fact(file)
         master_df = _append_to_masterdf(master_df, df)
+
+    log_topic = master_df
+    logging.debug(len(log_topic))
+    #logging.debug(log_topic.head(3))
+    return master_df
+
+
+def correct_names(master_df):
+
+    log_topic = master_df
+    logging.debug(len(log_topic.user.unique()))
+    logging.debug(log_topic.user.unique())
+
+    master_df.loc[master_df.user == 'Jesse', 'user'] = 'Jesse Niëns'
+
+    logging.debug(len(log_topic.user.unique()))
+    logging.debug(log_topic.user.unique())
 
     return master_df
 
 
-# master_df = create_empty_df()
+def filterout_fun_as_user(master_df):
+    log_topic = master_df
+    logging.debug(len(log_topic))
+    logging.debug(len(log_topic.user.unique()))
+    logging.debug(log_topic.user.unique())
+
+    df_filtered_fun = master_df[master_df.user != 'Fun Fun Fun']  # Filter out Fun Fun Fun User
+
+    log_topic = df_filtered_fun
+    logging.debug(len(log_topic))
+    logging.debug(len(log_topic.user.unique()))
+    logging.debug(log_topic.user.unique())
+
+    return df_filtered_fun
+
+
+def remove_duplicates(master_df):
+    logging.debug(len(master_df))
+
+    df_without_duplicates = master_df.drop_duplicates(subset=[
+        'datetime',
+        'message',
+        'user'
+    ])
+
+    logging.debug(len(df_without_duplicates))
+    logging.debug(f'Removed {round( (len(master_df)-len(df_without_duplicates)) / len(master_df) * 100, 2)} percent')
+
+    return df_without_duplicates
+
+
+def new_master_df_to_csv(master_df):
+    filename = 'new_master_facttable.csv'
+    master_df.to_csv(filename, sep=';', encoding='utf-8', index=False)
+
+
+def change_to_master_dir():
+    os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\3_master_csv_fact")
 
 change_to_masterdf_dir()
 master_df = get_master_df()
-file_list_android = get_android_tab_dels()
-# change_to_android_dir()
-# raw_master_df = loop_append_to_masterdf(master_df, file_list_android)
-# file_list_iphone = get_iphone_tab_dels()
-# change_to_iphone_dir()
-# raw_master_df2 = loop_append_to_masterdf(raw_master_df, file_list_iphone)
+change_to_android_dir()
+file_list_android = get_android_temp_csvs()
+raw_master_df = loop_append_to_masterdf(master_df, file_list_android)
+df_correct_names = correct_names(raw_master_df)
+df_filtered_fun = filterout_fun_as_user(df_correct_names)
+df_clean = remove_duplicates(df_filtered_fun)
+change_to_master_dir()
+new_master_df_to_csv(df_clean)
 
-
-
-"Remove duplicates based on Datetime and Message"
-"Adjust user names to one user per person"
-
-
-
-
-"Make name columns for first and last name"
-"""Add Year, Month, Weekday and Hour column based on Datetime"""
-
-"Make columns for nr words"
-"Make columns to check if message contains certain topics"
-
-"Save file to csv"
-"Create pickle"
