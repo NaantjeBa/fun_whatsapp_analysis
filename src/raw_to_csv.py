@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w'
                     )
 
+
 def get_raw_txtfiles():
     "Get list with every txt file"
     mypath = "C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\1_whatsapp_exports"
@@ -37,19 +38,6 @@ def _filter_out_singles(read_lines):
     return filtered_list
 
 
-def _make_first_tab(filtered_list):
-    first_tab_list = []
-    for line in filtered_list:
-        first_tab_index = line.find(' - ')  # Find first tab index
-        new_line = line[:first_tab_index] + '\t' + line[first_tab_index + 3:]  # create line with first tab
-        if new_line[0] == '[':
-            new_line = new_line[1:]
-        first_tab_list.append(new_line)
-
-    # count_first_tab = len(first_tab_list)
-    return first_tab_list
-
-
 def _make_first_sep(filtered_list):
     first_sep_list = []
     for line in filtered_list:
@@ -63,16 +51,6 @@ def _make_first_sep(filtered_list):
     return first_sep_list
 
 
-def _make_second_tab(first_tab_list):
-    second_tab_list = []
-    for line in first_tab_list:
-        second_tab_index = line.find(': ')  # Find second tab index
-        new_line = line[:second_tab_index] + '\t' + line[second_tab_index + 2:]  # create line with second tab
-        second_tab_list.append(new_line)
-
-    # count_second_tab = len(second_tab_list)
-    return second_tab_list
-
 def _make_second_sep(first_tab_list):
     second_tab_list = []
     for line in first_tab_list:
@@ -81,13 +59,6 @@ def _make_second_sep(first_tab_list):
         second_tab_list.append(new_line)
 
     return second_tab_list
-
-
-def _filter_in_twotabs(second_tab_list):
-
-    filtered_tab_list = [line for line in second_tab_list if line.count('\t') == 2]
-
-    return filtered_tab_list
 
 
 def _filter_in_twoseps(second_tab_list):
@@ -118,17 +89,6 @@ def _change_to_tabdel_dir():
     os.chdir("C:\\Users\\jniens\\GoogleDrive\\Python_Projects\\fun_whatsapp_analysis\\data_files\\2_tab_dels\\android")
 
 
-def _write_tabdel_txtfile(file_nr, filtered_tab_list):
-
-    file_name = 'tab_del_file_'
-    file_nr_str = str(file_nr)
-    file_type = '.txt'
-    full_file_name = file_name + file_nr_str + file_type
-    with open(full_file_name, 'w', encoding='utf-8') as f:
-        for item in filtered_tab_list:
-            f.write(item)
-
-
 def _write_csv_file(file_nr, filtered_tab_list):
 
     file_name = 'tab_del_file_'
@@ -138,18 +98,6 @@ def _write_csv_file(file_nr, filtered_tab_list):
     with open(full_file_name, 'w', encoding='utf-8') as f:
         for item in filtered_tab_list:
             f.write(item)
-
-
-def loop_create_tabdels(file_list):
-    for file_nr, file in enumerate(file_list):
-        _change_to_waexport_dir()
-        read_lines = _read_in_txt(file)
-        filtered_list = _filter_out_singles(read_lines)
-        first_tab_list = _make_first_tab(filtered_list)
-        second_tab_list = _make_second_tab(first_tab_list)
-        filtered_tab_list = _filter_in_twotabs(second_tab_list)
-        _change_to_tabdel_dir()
-        _write_tabdel_txtfile(file_nr, filtered_tab_list)
 
 
 def loop_create_csvs(file_list):
@@ -164,6 +112,6 @@ def loop_create_csvs(file_list):
         _change_to_tabdel_dir()
         _write_csv_file(file_nr, date_filtered_list)
 
+
 file_list = get_raw_txtfiles()
-# loop_create_tabdels(file_list)
 loop_create_csvs(file_list)
